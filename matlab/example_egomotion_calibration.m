@@ -2,7 +2,7 @@
 close all; clear; clc;
 
 % Create data matrices
-n_points = 10;
+n_points = 130;
 % Noise levels
 sigma_t = 0.01;
 sigma = 0.01;

@@ -4,8 +4,9 @@ close all; clear; clc;
 % Read data matrices
 
 load('../data/sim_ri_05.mat');
-R_bc = tform2rotm(T_bc); 
-t_bc = tform2trvec(T_bc);
+R_bc = tform2rotm(inv(T_bc)); 
+t_bc = tform2trvec(inv(T_bc));
+% T_bc(1:3,4) = -R_bc*T_bc(1:3,4);
 
 motion_point = length(camera_T);
 
@@ -18,15 +19,20 @@ for point = 1 : motion_point-1
     K_cam_last= [camera_R(:,:,point) camera_T(:,point); 0 0 0 1];
     K_cam = [camera_R(:,:,point+1) camera_T(:,point+1); 0 0 0 1];
 
-%     K_leg_last= [robot_gt_R(:,:,point) robot_gt_T(:,point); 0 0 0 1];
-%     K_leg = [robot_gt_R(:,:,point+1) robot_gt_T(:,point+1); 0 0 0 1];
+%     K_cam_last= (T_bc) * [robot_cam_R(:,:,point) robot_cam_T(:,point); 0 0 0 1] * inv(T_bc);
+%     K_cam = (T_bc) * [robot_cam_R(:,:,point+1) robot_cam_T(:,point+1); 0 0 0 1] * inv(T_bc);
+
+    K_leg_last= [robot_gt_R(:,:,point) robot_gt_T(:,point); 0 0 0 1];
+    K_leg = [robot_gt_R(:,:,point+1) robot_gt_T(:,point+1); 0 0 0 1];
 
 %     K_cam_last= [robot_gt_R(:,:,point) robot_gt_T(:,point); 0 0 0 1];
 %     K_cam = [robot_gt_R(:,:,point+1) robot_gt_T(:,point+1); 0 0 0 1];
 
-    K_leg_last= [robot_cam_R(:,:,point) robot_cam_T(:,point); 0 0 0 1];
-    K_leg = [robot_cam_R(:,:,point+1) robot_cam_T(:,point+1); 0 0 0 1];
-    
+%     K_leg_last= [robot_cam_R(:,:,point) robot_cam_T(:,point); 0 0 0 1];
+%     K_leg = [robot_cam_R(:,:,point+1) robot_cam_T(:,point+1); 0 0 0 1];
+ 
+%     K_leg_last= [robot_leg_wrong_R(:,:,point) robot_leg_wrong_T(:,point); 0 0 0 1];
+%     K_leg = [robot_leg_wrong_R(:,:,point+1) robot_leg_wrong_T(:,point+1); 0 0 0 1];
 %     dat_T_cam = inv(K_cam_last) * K_cam;
 %     dat_T_leg = inv(K_leg_last) * K_leg;    
     
@@ -39,7 +45,7 @@ for point = 1 : motion_point-1
     B_sensor_T(:,point) = tform2trvec(dat_T_cam)'; 
 end
 
-[R_cal, t_cal] = egomotion_calibration(B_sensor_R,B_sensor_T,A_body_R,A_body_T);
+[R_cal, t_cal] = egomotion_calibration(A_body_R,A_body_T,B_sensor_R,B_sensor_T);
 % Solve
 disp('Estimate:');
 R_cal
